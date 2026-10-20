@@ -18,7 +18,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI, // fail the build if someone leaves test.only in the code
   retries: isCI ? 1 : 0,
-  workers: isCI ? 2 : undefined,
+  // One worker in CI: every test signs up a new user, and the server limits sign-ups per IP address.
+  workers: isCI ? 1 : undefined,
 
   timeout: 60_000,
   expect: { timeout: 10_000 },

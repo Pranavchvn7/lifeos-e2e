@@ -34,7 +34,7 @@ async function cleanup(page: Page, user: TestUser): Promise<void> {
     await page.goto('/');
     await shell.greeting.or(login.submit).first().waitFor({ timeout: 20_000 });
     if (await login.submit.isVisible()) {
-      await login.signIn(user.email, user.password);
+      await login.signInAndEnter(user.email, user.password, shell);
     }
     await shell.expectReady();
     await shell.openSettings();
@@ -59,8 +59,7 @@ export const test = base.extend<Fixtures & Options>({
   signedIn: async ({ page, user, login, shell, frozenAt }, use) => {
     if (frozenAt) await page.clock.setFixedTime(frozenAt);
     await login.goto();
-    await login.signUp(user);
-    await shell.expectReady();
+    await login.signUpAndEnter(user, shell);
     await use(user);
   },
 

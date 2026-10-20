@@ -37,6 +37,9 @@ test.describe('Daily log', () => {
     await todo.add('Buy groceries', { priority: 'high' });
 
     await todo.complete('Buy groceries');
+    await expect(todo.item('Buy groceries')).toHaveCount(0); // done tasks leave the default "Open" list
+
+    await todo.filter('done');
     await expect(todo.item('Buy groceries')).toHaveAttribute('data-done', 'true');
   });
 });

@@ -153,7 +153,7 @@ Every test gets its **own account**, so tests never affect each other. That's wh
 | **Two projects** | `chromium`, `mobile-chrome` | Smoke tests run on desktop *and* a Pixel-7-sized screen (bottom navigation instead of the sidebar). The same page-object method (`shell.goTo('board')`) works for both. |
 
 ### Why some choices matter
-- **No `waitForTimeout` sleeps.** Playwright auto-waits for elements; `persist()` waits for the network. That keeps tests fast and non-flaky.
+- **No `waitForTimeout` sleeps** — with one documented exception: an 11-second pause when the server answers "Too many requests" (see `LoginPage.attempt`). Otherwise Playwright auto-waits for elements and `persist()` waits for the network.
 - **`test.use({ frozenAt })` is set *before* sign-up** and always uses a date in the **past**, so login sessions stay valid.
 - **Fixed timezone (UTC)** means the same results on your laptop in Pune and on GitHub's servers.
 
@@ -251,7 +251,9 @@ Every test gets its **own account**, so tests never affect each other. That's wh
 | `locator.click: element not found` | The app's markup/test id changed | Update the **page object** (one place). |
 | Passes locally, fails in CI | Timing, or different timezone/locale | Use `persist()`/web-first `expect`, never sleeps. The config already pins UTC. |
 | Expectation `79%` got `80%` | App scoring logic changed | Real bug *or* intended change → talk to the app owner, update `src/data/score-cases.ts`. |
-| Everything fails at sign-up | Site down, DB down, or wrong `BASE_URL` | Run the health test: `npx playwright test health`. |
+| Everything fails at sign-up | Site down, DB down, or wrong `BASE_URL` | Run the health test: `npx playwright test health`. The failure message now quotes the app's own error text. |
+| `Sign-up was rejected by the app: "…Too many requests… (429)"` | The server limits sign-ups/sign-ins per IP address and CI sends many from one machine | The framework retries after a pause and CI uses one worker. If it still happens, ask for a higher limit on the staging site. |
+| Done task "disappears" in a to-do test | The To-do tab shows *Open* tasks by default | Switch the filter (`todo.filter('done')`) before asserting. |
 | Random failures only on weekends | A test depended on today's date | Pin the clock with `frozenAt`. |
 
 **Add a new test (recipe)**

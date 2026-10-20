@@ -42,7 +42,7 @@ test.describe('Settings and account', () => {
     await settings.deleteAccount();
 
     await login.signIn(signedIn.email, signedIn.password);
-    await login.expectError(/doesn't match|could not sign in/i);
+    await login.expectError(/doesn't match/i);
     signedIn.created = false; // already gone, nothing to clean up
   });
 
@@ -53,8 +53,7 @@ test.describe('Settings and account', () => {
       await page.clock.install({ time: lastWeekday(WEEKDAY.Wed, 19, 58) });
 
       await login.goto();
-      await login.signUp(user);
-      await shell.expectReady();
+      await login.signUpAndEnter(user, shell);
       await today.loadExample(); // reminders only matter when there are habits and nothing is logged
 
       await shell.openSettings();
