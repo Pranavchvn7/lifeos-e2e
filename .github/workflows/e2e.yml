@@ -1,0 +1,96 @@
+name: E2E tests
+
+on:
+  # 1. Whenever the framework itself changes (new test, fixed selector…)
+  push:
+    branches: [main]
+  pull_request:
+  # 2. Every night, the full regression suite against the live site (03:00 IST = 21:30 UTC)
+  schedule:
+    - cron: "30 21 * * *"
+  # 3. On demand, from the Actions tab ("Run workflow"), against any URL
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Site to test (leave empty to use the repository variable E2E_BASE_URL)"
+        required: false
+        type: string
+      suite:
+        description: "Which tests to run"
+        required: true
+        default: smoke
+        type: choice
+        options: [smoke, regression, all]
+
+# A newer run on the same branch cancels the older one that is still running.
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Priority: manual input > repository variable > default production URL
+  BASE_URL: ${{ inputs.base_url || vars.E2E_BASE_URL || 'https://life-os-lake-three.vercel.app' }}
+  ALLURE: "true"
+
+jobs:
+  smoke:
+    name: Smoke (desktop + mobile)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run typecheck
+
+      - name: Run smoke tests
+        run: npx playwright test --grep @smoke
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-reports
+          retention-days: 14
+          path: |
+            playwright-report
+            allure-results
+            test-results
+
+  regression:
+    name: Full regression
+    # Only on the nightly schedule, or when you ask for it by hand. Smoke must pass first.
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.suite != 'smoke')
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Run regression tests
+        run: npx playwright test --project=chromium --grep @regression
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-reports
+          retention-days: 14
+          path: |
+            playwright-report
+            allure-results
+            test-results
