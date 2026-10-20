@@ -45,10 +45,24 @@ test.describe('Share my progress', () => {
     const guest = await browser.newContext({ baseURL });
     try {
       const share = new SharePage(await guest.newPage());
-      await share.open(oldUrl);
-      await expect(share.missing).toBeVisible();
       await share.open(newUrl);
-      await expect(share.title).toBeVisible();
+      await expect(share.title).toBeVisible(); // the new link works…
+      await share.open(oldUrl);
+      await expect(share.missing).toBeVisible(); // …and the old one is really gone
+    } finally {
+      await guest.close();
+    }
+  });
+
+  test('a link created before anything is logged still opens (empty board)', { tag: ['@regression'] }, async ({ signedIn, shell, settings, browser, baseURL }) => {
+    await shell.openSettings();
+    const url = await settings.createShareLink(); // brand-new account: nothing has been saved yet
+
+    const guest = await browser.newContext({ baseURL });
+    try {
+      const share = new SharePage(await guest.newPage());
+      await share.open(url);
+      await expect(share.title).toContainText(`${signedIn.firstName}'s progress`);
     } finally {
       await guest.close();
     }

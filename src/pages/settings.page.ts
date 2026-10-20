@@ -110,6 +110,7 @@ export class SettingsPage extends BasePage {
     await this.openSection('danger');
     await this.byId('reset-start').click();
     await persist(this.page, () => this.byId('reset-confirm').click());
+    await expect(this.dialog).toBeHidden(); // the dialog closes itself once everything is cleared
   }
 
   async deleteAccount(): Promise<void> {

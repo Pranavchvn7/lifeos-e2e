@@ -21,7 +21,6 @@ test.describe('Settings and account', () => {
       await today.loadExample();
       await shell.openSettings();
       await settings.startOver();
-      await settings.close();
 
       await expect(today.welcomePanel).toBeVisible();
       await expect(today.doItems()).toHaveCount(0);
