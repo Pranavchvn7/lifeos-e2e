@@ -1,6 +1,6 @@
 # LifeOS E2E Tests
 
-![E2E](https://github.com/<your-username>/lifeos-e2e/actions/workflows/e2e.yml/badge.svg)
+![E2E](https://github.com/pranavchvn7/lifeos-e2e/actions/workflows/e2e.yml/badge.svg)
 
 End-to-end tests for **LifeOS** (<https://life-os-lake-three.vercel.app>) — Playwright + TypeScript, Page Object Model,
 custom fixtures, data-driven cases, GitHub Actions CI.
