@@ -1,6 +1,6 @@
 # LifeOS E2E Tests
 
-![E2E](https://github.com/<your-username>/lifeos-e2e/actions/workflows/e2e.yml/badge.svg)
+![E2E](https://github.com/Pranavchvn7/lifeos-e2e/actions/workflows/e2e.yml/badge.svg)
 
 End-to-end tests for **LifeOS** (<https://life-os-lake-three.vercel.app>) — Playwright + TypeScript, Page Object Model,
 custom fixtures, data-driven cases, GitHub Actions CI.
@@ -29,7 +29,7 @@ npm run report                 # open the HTML report
 
 ## CI
 
-**Allure report:** `https://<your-username>.github.io/lifeos-e2e/` (after the one-time Pages setup).
+**Allure report:** `https://Pranavchvn7.github.io/lifeos-e2e/` (after the one-time Pages setup).
 
 `.github/workflows/e2e.yml` runs **smoke** on every push/PR, the **full regression nightly** (03:00 IST) and **on demand**
 (Actions → *E2E tests* → *Run workflow*). Set the repository variable `E2E_BASE_URL` to choose the site under test.
