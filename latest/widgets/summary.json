@@ -1,1 +1,1 @@
-{"reportName":"LifeOS E2E","testRuns":[],"statistic":{"failed":0,"broken":0,"skipped":0,"passed":14,"unknown":0,"total":14},"time":{"start":1792579263953,"stop":1792579318739,"duration":54786,"minDuration":224,"maxDuration":4311,"sumDuration":35782}}
+{"reportName":"LifeOS E2E","testRuns":[],"statistic":{"failed":0,"broken":0,"skipped":0,"passed":14,"unknown":0,"total":14},"time":{"start":1792579507855,"stop":1792579576839,"duration":68984,"minDuration":259,"maxDuration":14048,"sumDuration":52679}}
