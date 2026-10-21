@@ -111,6 +111,7 @@ The framework sends that secret **only** to the site under test (never to third 
 | Red: `Secret E2E_DISPATCH_TOKEN is missing` / `Repository variable E2E_REPO is missing` | Typo in the name, or you created a *variable* where a *secret* is needed (token = secret, repo/URL = variables). |
 | Red: `GitHub answered HTTP 404` | `E2E_REPO` is wrong (`owner/repo`), or the token wasn't granted access to `lifeos-e2e`. |
 | Red: `HTTP 401` or `403` | Token expired, or it lacks **Contents: Read and write**. Create a new one (2.2) and update the secret. |
+| *Wait until the site answers* says `HTTP 308` / `redirects to: …` | The address variable ends with `/` (older workflow versions) or the site really redirects elsewhere. Remove the trailing slash from `E2E_PROD_URL` / `E2E_BASE_URL`, or set it to the address named in the message. |
 | e2e run starts but *Wait until the site answers* fails | The URL is wrong, the site is down, or it is a protected preview (use 2.6(b)). |
 | No ✅/❌ on the app commit | `APP_STATUS_TOKEN` missing, or the token isn't for the app repo / lacks *Commit statuses*. |
 | Runs happen for previews you didn't want | Remove or set `E2E_ON_PREVIEW` to something other than `true`. |
