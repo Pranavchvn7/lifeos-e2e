@@ -28,7 +28,9 @@ export default defineConfig({
     ['list'],
     ['html', { open: 'never' }],
     ...(isCI ? ([['github']] as const) : []),
-    ...(process.env.ALLURE === 'true' ? ([['allure-playwright']] as const) : []),
+    ...(process.env.ALLURE === 'true'
+      ? ([['allure-playwright', { environmentInfo: { BASE_URL: baseURL, NODE: process.version } }]] as const)
+      : []),
   ],
 
   use: {

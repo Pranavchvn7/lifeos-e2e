@@ -1,6 +1,7 @@
 import { test, expect } from '../../src/fixtures/test';
 import { SharePage } from '../../src/pages/share.page';
 import { WEEKDAY, lastWeekday } from '../../src/helpers/dates';
+import { newGuestContext } from '../../src/helpers/guest';
 
 test.use({ frozenAt: lastWeekday(WEEKDAY.Wed) });
 
@@ -17,7 +18,7 @@ test.describe('Share my progress', () => {
     expect(url).toMatch(/\/share\/[A-Za-z0-9_-]{20,}$/);
 
     // A visitor who is not signed in.
-    const guest = await browser.newContext({ baseURL, timezoneId: 'UTC', locale: 'en-US' });
+    const guest = await newGuestContext(browser, baseURL);
     const guestPage = await guest.newPage();
     const share = new SharePage(guestPage);
     try {
@@ -42,7 +43,7 @@ test.describe('Share my progress', () => {
     const newUrl = await settings.regenerateShareLink();
     expect(newUrl).not.toBe(oldUrl);
 
-    const guest = await browser.newContext({ baseURL });
+    const guest = await newGuestContext(browser, baseURL);
     try {
       const share = new SharePage(await guest.newPage());
       await share.open(newUrl);
@@ -58,7 +59,7 @@ test.describe('Share my progress', () => {
     await shell.openSettings();
     const url = await settings.createShareLink(); // brand-new account: nothing has been saved yet
 
-    const guest = await browser.newContext({ baseURL });
+    const guest = await newGuestContext(browser, baseURL);
     try {
       const share = new SharePage(await guest.newPage());
       await share.open(url);

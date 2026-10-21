@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { bypassHeaders } from '../../src/helpers/vercel-bypass';
 
 test('the deployment is healthy: database connected and auth tables ready', { tag: ['@smoke'] }, async ({ request }) => {
-  const response = await request.get('/api/auth/diagnostics');
+  const response = await request.get('/api/auth/diagnostics', { headers: bypassHeaders() });
   expect(response.ok()).toBeTruthy();
 
   const report = await response.json();

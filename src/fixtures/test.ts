@@ -1,5 +1,6 @@
 import { test as base, expect, type Page } from '@playwright/test';
 import { newUser, type TestUser } from '../helpers/user-factory';
+import { allowVercelBypass } from '../helpers/vercel-bypass';
 import { AppShell } from '../pages/app-shell.page';
 import { BoardPage } from '../pages/board.page';
 import { LoginPage } from '../pages/login.page';
@@ -46,6 +47,12 @@ async function cleanup(page: Page, user: TestUser): Promise<void> {
 
 export const test = base.extend<Fixtures & Options>({
   frozenAt: [undefined, { option: true }],
+
+  // Every browser context may need the Vercel preview-protection header (only when VERCEL_BYPASS_SECRET is set).
+  context: async ({ context, baseURL }, use) => {
+    await allowVercelBypass(context, baseURL);
+    await use(context);
+  },
 
   user: [
     async ({ page }, use) => {

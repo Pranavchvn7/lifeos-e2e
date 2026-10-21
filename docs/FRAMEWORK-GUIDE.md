@@ -52,12 +52,13 @@ Two repos, two jobs: **the app repo ships the website; the e2e repo judges it.**
 
 **How the two repos are connected:** only by the **URL** — the `BASE_URL` setting. The framework knows nothing about the app's source code. It uses *test ids* (like `data-testid="logout-button"`) that the app already exposes — that's the one agreement between them (listed in the app repo's `docs/TESTING.md`).
 
-**How tests get triggered today (all three work out of the box):**
+**How tests get triggered today (all four work out of the box — setup in [CI-CD-SETUP.md](CI-CD-SETUP.md)):**
 1. **On push / pull request** *to the e2e repo* — proves the framework itself still works.
 2. **Nightly at 03:00 IST** — the full regression suite against the live site.
 3. **Manually** — Actions tab → *E2E tests* → *Run workflow* (choose smoke / regression / all, optional URL).
+4. **After every app deployment** — a small workflow in the app repo tells this repo what was deployed (`repository_dispatch`); smoke runs against it and the result is written back as ✅/❌ on the app commit.
 
-**Later (phase 2):** run the smoke tests automatically after every Vercel deploy of the app. That needs a small workflow in the app repo that calls the e2e repo (`repository_dispatch`). We'll add it once the basics are green — it's listed in the roadmap (section 11).
+**Run after deploy:** done — see [CI-CD-SETUP.md](CI-CD-SETUP.md), part 2.
 
 > Rule of thumb: **separate repo for the framework now; add the "run after deploy" link later.**
 
@@ -179,6 +180,8 @@ Every test gets its **own account**, so tests never affect each other. That's wh
 5. `npm run typecheck` – catches TypeScript mistakes before any browser starts.
 6. `npx playwright test --grep @smoke` – runs the smoke tests on desktop + mobile.
 7. `upload-artifact` (with `if: always()`) – keeps the HTML report, Allure results and failure screenshots/videos/traces for 14 days, **even when tests fail**.
+
+**Job 3 — `allure-report`** (after every non-PR run): downloads the Allure results of the other jobs, generates an Allure report **with trend history**, and publishes it to the `gh-pages` branch (GitHub Pages). Details: [CI-CD-SETUP.md](CI-CD-SETUP.md), part 3.
 
 **Job 2 — `regression`** (only nightly, or when you choose *regression/all* manually)
 - `needs: smoke` → if smoke fails, don't waste time on 40 more tests.
@@ -304,8 +307,8 @@ Every test gets its **own account**, so tests never affect each other. That's wh
 ## 11. Roadmap (in a sensible order)
 
 1. **Get smoke green** on the live site; fix any first-run selector/timing issues.
-2. **Allure report on GitHub Pages** — `ALLURE=true` already writes `allure-results`; add a step with `allure-report-action` to publish a pretty history report.
-3. **Run after every deploy** — a tiny workflow in the *app* repo that triggers this repo after a successful Vercel deploy (`repository_dispatch`), so a bad release is flagged within minutes.
+2. ~~Allure report on GitHub Pages~~ — **done** (CI-CD-SETUP.md, part 3).
+3. ~~Run after every deploy~~ — **done** (CI-CD-SETUP.md, part 2).
 4. **Slack/Teams/e-mail notification** on nightly failure.
 5. **Staging environment** (second Vercel project + Neon branch) so regression never touches production data.
 6. **API tests** (Playwright `request`) for sign-up/health, plus **accessibility checks** with `@axe-core/playwright`.
