@@ -12,6 +12,7 @@
     "test:ui": "playwright test --ui",
     "test:debug": "playwright test --debug",
     "report": "playwright show-report",
+    "summary": "node scripts/summarize.mjs",
     "typecheck": "tsc --noEmit",
     "browsers": "playwright install --with-deps chromium"
   },

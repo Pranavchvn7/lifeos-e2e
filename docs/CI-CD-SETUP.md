@@ -44,7 +44,7 @@ If the check fails the **Merge** button stays blocked until you fix it.
 3. Notes: GitHub can delay scheduled runs by 5–60 minutes at busy times, and **pauses schedules after 60 days without repo activity** — any commit wakes it up again.
 
 ### 1.4 Get an email when something breaks
-GitHub → your profile photo → **Settings → Notifications → System → Actions** → choose **Send notifications for failed workflows only** (email and/or web/mobile).
+See **Part 4** below (email alerts, how to test them, and what the new run summary shows).
 
 ---
 
@@ -122,7 +122,9 @@ The framework sends that secret **only** to the site under test (never to third 
 
 ## Part 3 — Allure report on GitHub Pages
 
-Every run (push to `main`, nightly, manual, after-deploy) now ends with a **Publish Allure report** job: it collects the results of the smoke and regression jobs, builds an Allure report **with trend history**, and publishes it to the `gh-pages` branch. Pull-request runs don't publish.
+> **Optional and OFF by default.** GitHub Pages is free for **public** repositories; private repositories need a paid plan. The job is skipped until you create the repository variable **`ALLURE_PAGES` = `true`**. Without it, you still get the normal Playwright HTML report in each run's Artifacts.
+
+When switched on, every run (push to `main`, nightly, manual, after-deploy) ends with a **Publish Allure report** job: it collects the results of the smoke and regression jobs, builds an Allure report **with trend history**, and publishes it to the `gh-pages` branch. Pull-request runs don't publish.
 
 ### 3.1 One-time setup
 1. The repo must be **public** (GitHub Pages on private repos needs a paid plan).
@@ -158,6 +160,39 @@ Every run (push to `main`, nightly, manual, after-deploy) now ends with a **Publ
 | Report is empty | The test jobs didn't upload `allure-results-*` (check the run's Artifacts) — the workflow sets `ALLURE=true` for that. |
 | `allure-commandline` / Java error | Open the *Generate the report* step log; the job installs Java 17 itself. Re-run once — it downloads the tool from npm. |
 | Trend graph has only one point | Normal for the first run; history accumulates from the second run on. |
+
+---
+
+## Part 4 — Failure alerts by email, run summary, automatic updates
+
+### 4.1 Turn on the emails (2 minutes)
+1. GitHub → profile photo → **Settings → Notifications**.
+2. Scroll to **System → Actions**. Set **Notify me** to **Email** (add **On GitHub** and **GitHub Mobile** if you like push alerts on your phone).
+3. Tick **Send notifications for failed workflows only** — otherwise you also get an email for every green run.
+4. Check **Settings → Emails** for the address that receives them, and look in spam the first time.
+
+**Who is emailed?** GitHub sends the failure to a *person*:
+- **Nightly runs** → the person who last edited the `cron:` line in `e2e.yml` (you, from your last upload of that file).
+- **After-deploy runs** → the owner of the token that sent the message (you).
+- **Manual and push runs** → whoever started them.
+If someone else ever edits the cron line, the nightly alerts go to them.
+
+### 4.2 Test the alert (safe, 1 minute)
+Actions → **E2E tests** → **Run workflow** → in *Site to test* type `http://not-secure` → Run.
+The first step rejects it immediately (it must start with `https://`), the run turns red within seconds, and an email arrives within a few minutes. If you get none after ~10 minutes, recheck 4.1.
+
+### 4.3 The run summary
+Open any run → the **Summary** page now has a **Test results** table: passed / failed / **flaky** / skipped, a list of flaky and failed tests with their first error line, and the 5 slowest tests (a test ~11 s slower than its neighbours probably waited for the sign-up rate limit).
+*Flaky = failed first, passed on retry.* A green run with flaky tests is still a problem waiting to happen: fix them.
+
+The commit status on your pull requests now carries the numbers too, e.g. **Smoke tests passed (14 passed, 0 failed, 0 flaky in 2m 41s)**.
+
+### 4.4 Faster pull-request gate
+Staging previews run **two tests at a time** (production, nightly and manual runs stay at one). Compare the duration in the status text before and after your next few pull requests.
+
+### 4.5 Automatic dependency and action updates (Dependabot)
+The file `.github/dependabot.yml` makes GitHub open weekly pull requests that update npm packages (Playwright separately from the rest) and the GitHub Actions used in the workflows — which also removes the "Node 20 is deprecated" warning once the new action versions land.
+Each Dependabot pull request runs the smoke tests; **merge it when it is green**, close it if it breaks something and tell me. The first ones appear within a day of uploading the file.
 
 ---
 

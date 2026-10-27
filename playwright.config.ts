@@ -18,8 +18,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI, // fail the build if someone leaves test.only in the code
   retries: isCI ? 1 : 0,
-  // One worker in CI: every test signs up a new user, and the server limits sign-ups per IP address.
-  workers: isCI ? 1 : undefined,
+  // One worker in CI: every test signs up a new user, and a production server limits sign-ups per IP address.
+  // The workflow raises this (E2E_WORKERS=2) for staging previews, where that limit is switched off.
+  workers: process.env.E2E_WORKERS ? Number(process.env.E2E_WORKERS) : isCI ? 1 : undefined,
 
   timeout: 60_000,
   expect: { timeout: 10_000 },
@@ -27,7 +28,9 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', { open: 'never' }],
-    ...(isCI ? ([['github']] as const) : []),
+    ...(isCI
+      ? ([['github'], ['json', { outputFile: 'test-results/report.json' }]] as const) // json feeds scripts/summarize.mjs
+      : []),
     ...(process.env.ALLURE === 'true'
       ? ([['allure-playwright', { environmentInfo: { BASE_URL: baseURL, NODE: process.version } }]] as const)
       : []),
